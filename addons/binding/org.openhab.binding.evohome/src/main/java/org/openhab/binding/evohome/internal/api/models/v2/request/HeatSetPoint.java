@@ -32,11 +32,16 @@ public class HeatSetPoint {
      *
      * @param setPoint The target temperature to set the set point to
      */
-    HeatSetPoint(double setPoint) {
+    HeatSetPoint(double setPoint, String until) {
         // Make sure that the value is rounded toward the nearest 0.5
         heatSetpointValue = Math.round(setPoint * 2) / 2.0;
-        setpointMode = "PermanentOverride";
-        timeUntil = null;
+        if (until == null) {
+            setpointMode = "PermanentOverride";
+            timeUntil = null;
+        } else {
+            setpointMode = "TemporaryOverride";
+            timeUntil = until;
+        }
     }
 
     @SerializedName("heatSetpointValue")

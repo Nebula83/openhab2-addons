@@ -8,6 +8,9 @@
  */
 package org.openhab.binding.evohome.internal.api.models.v2.request;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Builder for heat set point API requests
  *
@@ -19,6 +22,7 @@ public class HeatSetPointBuilder implements RequestBuilder<HeatSetPoint> {
     private double setPoint;
     private boolean hasSetPoint;
     private boolean cancelSetPoint;
+    private String until;
 
     /**
      * Creates a new heat set point command
@@ -32,7 +36,7 @@ public class HeatSetPointBuilder implements RequestBuilder<HeatSetPoint> {
             return new HeatSetPoint();
         }
         if (hasSetPoint) {
-            return new HeatSetPoint(setPoint);
+            return new HeatSetPoint(setPoint, until);
         }
         return null;
     }
@@ -45,6 +49,15 @@ public class HeatSetPointBuilder implements RequestBuilder<HeatSetPoint> {
 
     public HeatSetPointBuilder setCancelSetPoint() {
         cancelSetPoint = true;
+        return this;
+    }
+
+    public HeatSetPointBuilder setUntil(ZonedDateTime until) {
+        if (until == null) {
+            this.until = null;
+        } else {
+            this.until = until.format(DateTimeFormatter.ISO_INSTANT);
+        }
         return this;
     }
 

@@ -10,6 +10,7 @@ package org.openhab.binding.evohome.internal.api;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,10 +23,12 @@ import org.openhab.binding.evohome.internal.api.models.v2.request.HeatSetPointBu
 import org.openhab.binding.evohome.internal.api.models.v2.request.Mode;
 import org.openhab.binding.evohome.internal.api.models.v2.request.ModeBuilder;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Authentication;
+import org.openhab.binding.evohome.internal.api.models.v2.response.DailySchedules;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Location;
 import org.openhab.binding.evohome.internal.api.models.v2.response.LocationStatus;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Locations;
 import org.openhab.binding.evohome.internal.api.models.v2.response.LocationsStatus;
+import org.openhab.binding.evohome.internal.api.models.v2.response.Schedule;
 import org.openhab.binding.evohome.internal.api.models.v2.response.UserAccount;
 import org.openhab.binding.evohome.internal.configuration.EvohomeAccountConfiguration;
 import org.slf4j.Logger;
@@ -41,6 +44,7 @@ public class EvohomeApiClient {
 
     private static final String CLIENT_ID = "4a231089-d2b6-41bd-a5eb-16a0a422b999";
     private static final String CLIENT_SECRET = "1a15cdb8-42de-407b-add0-059f92c530cb";
+    private static final String ZONE_TYPE = "temperatureZone";
 
     private final Logger logger = LoggerFactory.getLogger(EvohomeApiClient.class);
     private final HttpClient httpClient;
@@ -136,14 +140,21 @@ public class EvohomeApiClient {
         apiAccess.doAuthenticatedPut(url, modeCommand);
     }
 
-    public void setHeatingZoneOverride(String zoneId, double setPoint) throws TimeoutException {
-        HeatSetPoint setPointCommand = new HeatSetPointBuilder().setSetPoint(setPoint).build();
+    public void setHeatingZoneOverride(String zoneId, double setPoint, ZonedDateTime until) throws TimeoutException {
+        HeatSetPoint setPointCommand = new HeatSetPointBuilder().setSetPoint(setPoint).setUntil(until).build();
         setHeatingZoneOverride(zoneId, setPointCommand);
     }
 
     public void cancelHeatingZoneOverride(String zoneId) throws TimeoutException {
         HeatSetPoint setPointCommand = new HeatSetPointBuilder().setCancelSetPoint().build();
         setHeatingZoneOverride(zoneId, setPointCommand);
+    }
+
+    public DailySchedules requestSchedules(String zoneId) throws TimeoutException {
+        String url = EvohomeApiConstants.URL_V2_BASE + EvohomeApiConstants.URL_V2_SCHEDULE;
+        url = String.format(url, ZONE_TYPE, zoneId);
+        Schedule schedule = apiAccess.doAuthenticatedGet(url, Schedule.class);
+        return schedule.getDailySchedules();
     }
 
     private void setHeatingZoneOverride(String zoneId, HeatSetPoint heatSetPoint) throws TimeoutException {

@@ -8,6 +8,7 @@
  */
 package org.openhab.binding.evohome.internal.api;
 
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -26,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 
 /**
  * Provides access to (an optionally OAUTH based) API. Makes sure that all the necessary headers are set.
@@ -104,7 +106,11 @@ public class ApiAccess {
                 String reply = response.getContentAsString();
 
                 if (outClass != null) {
-                    retVal = new Gson().fromJson(reply, outClass);
+                    Gson gson = new GsonBuilder().registerTypeAdapter(LocalTime.class,
+                            (JsonDeserializer<LocalTime>) (json, type, jsonDeserializationContext) -> LocalTime
+                                    .parse(json.getAsJsonPrimitive().getAsString()))
+                            .create();
+                    retVal = gson.fromJson(reply, outClass);
                 }
             }
         } catch (InterruptedException | ExecutionException e) {

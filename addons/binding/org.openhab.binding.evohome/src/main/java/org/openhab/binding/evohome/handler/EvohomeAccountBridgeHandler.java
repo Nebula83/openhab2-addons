@@ -8,6 +8,8 @@
  */
 package org.openhab.binding.evohome.handler;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -121,8 +123,37 @@ public class EvohomeAccountBridgeHandler extends BaseBridgeHandler {
         tryToCall(() -> apiClient.setTcsMode(tcsId, mode));
     }
 
-    public void setPermanentSetPoint(String zoneId, double doubleValue) {
-        tryToCall(() -> apiClient.setHeatingZoneOverride(zoneId, doubleValue));
+    public void setHeatSetPoint(String zoneId, double doubleValue) {
+        if (configuration.temporaryOverrideSchedule) {
+            try {
+                ScheduleHelper scheduleHelper = new ScheduleHelper(apiClient.requestSchedules(zoneId));
+
+                if (scheduleHelper.hasSchedule()) {
+                    ZonedDateTime zoned = ZonedDateTime.now(ZoneId.systemDefault());
+                    double scheduleTemperature = scheduleHelper.getScheduleTemperature(zoned);
+
+                    if (Double.compare(doubleValue, scheduleTemperature) == 0) {
+                        logger.debug("New temperature {} is the current scheduled temperature, cancel override for zone {}",
+                                doubleValue, zoneId);
+                        tryToCall(() -> apiClient.cancelHeatingZoneOverride(zoneId));
+                    } else {
+                        ZonedDateTime until = scheduleHelper.getStartNextSwitchPoint(zoned);
+                        logger.debug("Set temporary temperature for zone {} to {} until next switch point in schedule at {}",
+                                zoneId, doubleValue, until);
+                        tryToCall(() -> apiClient.setHeatingZoneOverride(zoneId, doubleValue, until));
+                    }
+                } else {
+                    logger.debug("No schedule found for zone {}. Set permanent temperature to {}", zoneId, doubleValue);
+                    tryToCall(() -> apiClient.setHeatingZoneOverride(zoneId, doubleValue, null));
+                }
+            } catch (TimeoutException e) {
+                logger.error("Failed to retieve schedule for zone {}, SKIP setting temperature to {}", zoneId,
+                        doubleValue);
+            }
+        } else {
+            logger.debug("Do not override schedule, set permanent temperature for zone {} to {}", zoneId, doubleValue);
+            tryToCall(() -> apiClient.setHeatingZoneOverride(zoneId, doubleValue, null));
+        }
     }
 
     public void cancelSetPointOverride(String zoneId) {
