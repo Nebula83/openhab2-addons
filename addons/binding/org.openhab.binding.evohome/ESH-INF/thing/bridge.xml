@@ -9,6 +9,10 @@
 				<label>Authentication</label>
 				<description>Contains the settings needed to authenticate against the TCC service.</description>
 			</parameter-group>
+			<parameter-group name="heating">
+                <label>Heating</label>
+                <description>Heating Settings.</description>
+            </parameter-group>
 			<parameter name="username" type="text" required="true" groupName="auth">
 				<label>Username</label>
 				<description>Your TCC Username</description>
@@ -23,6 +27,11 @@
 				<description>The refresh interval to poll TCC (in seconds).</description>
 				<default>15</default>
 				<advanced>true</advanced>
+			</parameter>
+			<parameter name="temporaryOverrideSchedule" type="boolean" required="false" groupName="heating">
+                <label>Temporary Override Schedule</label>
+                <description>Setting a new temperature overrides the zone schedule temporary instead of permanent.</description>
+                <default>false</default>
 			</parameter>
 		</config-description>
 	</bridge-type>

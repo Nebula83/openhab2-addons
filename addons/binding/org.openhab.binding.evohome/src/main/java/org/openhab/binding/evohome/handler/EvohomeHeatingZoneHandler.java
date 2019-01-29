@@ -84,7 +84,7 @@ public class EvohomeHeatingZoneHandler extends BaseEvohomeHandler {
                         newTemp = 5;
                     }
                     if (newTemp >= 5 && newTemp <= 35) {
-                        bridge.setPermanentSetPoint(getEvohomeThingConfig().id, newTemp);
+                        bridge.setHeatSetPoint(getEvohomeThingConfig().id, newTemp);
                     }
                 }
             }
