@@ -57,6 +57,32 @@ public abstract class BaseEvohomeHandler extends BaseThingHandler {
     }
 
     /**
+     * Returns the delegated override mode of the Thing
+     *
+     * @return The override mode to use
+     */
+    protected int getOverrideMode() {
+        if (getEvohomeThingConfig().overrideMode == -1) {
+            return this.getEvohomeBridge().getOverrideMode();
+        } else {
+            return getEvohomeThingConfig().overrideMode;
+        }
+    }
+
+    /**
+     * Returns the delegated override time of the Thing
+     *
+     * @return The override time to use
+     */
+    protected int getOverrideTime() {
+        if (getEvohomeThingConfig().overrideTime == -1) {
+            return this.getEvohomeBridge().getOverrideTime();
+        } else {
+            return getEvohomeThingConfig().overrideTime;
+        }
+    }
+
+    /**
      * Retrieves the bridge
      *
      * @return The evohome brdige
@@ -109,8 +135,8 @@ public abstract class BaseEvohomeHandler extends BaseThingHandler {
      * Updates the status of the evohome thing when it changes
      *
      * @param newStatus The new status to update to
-     * @param detail The status detail value
-     * @param message The message to show with the status
+     * @param detail    The status detail value
+     * @param message   The message to show with the status
      */
     protected void updateEvohomeThingStatus(ThingStatus newStatus, ThingStatusDetail detail, String message) {
         // Prevent spamming the log file

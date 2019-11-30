@@ -9,13 +9,14 @@
 package org.openhab.binding.evohome.internal.configuration;
 
 /**
- * Contains the configuration of the binding.
+ * List of evohome API constants
  *
- * @author Jasper van Zuijlen - Initial contribution
+ * @author James Kinsman - Initial Contribution
  *
  */
-public class EvohomeTemperatureControlSystemConfiguration {
-    public String id;
-    public String name;
-
+public class EvohomeOverrideModeConstants {
+    public static final int BRIDGE_INHERIT = -1;
+    public static final int PERMANENT_OVERRIDE = 0;
+    public static final int TEMPORARY_OVERRIDE_SCHEDULE_NEXT = 1;
+    public static final int TEMPORARY_OVERRIDE_TIME_ADD = 2;
 }

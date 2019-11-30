@@ -8,6 +8,7 @@
  */
 package org.openhab.binding.evohome.handler;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.eclipse.smarthome.core.thing.binding.ThingHandler;
 import org.eclipse.smarthome.core.types.Command;
 import org.openhab.binding.evohome.internal.RunnableWithTimeout;
 import org.openhab.binding.evohome.internal.api.EvohomeApiClient;
+import org.openhab.binding.evohome.internal.api.models.v2.response.DailySchedules;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Gateway;
 import org.openhab.binding.evohome.internal.api.models.v2.response.GatewayStatus;
 import org.openhab.binding.evohome.internal.api.models.v2.response.Location;
@@ -109,6 +111,10 @@ public class EvohomeAccountBridgeHandler extends BaseBridgeHandler {
     public void handleCommand(ChannelUID channelUID, Command command) {
     }
 
+    EvohomeAccountConfiguration getConfiguration() {
+        return configuration;
+    }
+
     public Locations getEvohomeConfig() {
         return apiClient.getInstallationInfo();
     }
@@ -117,8 +123,30 @@ public class EvohomeAccountBridgeHandler extends BaseBridgeHandler {
         return apiClient.getInstallationStatus();
     }
 
+	public int getOverrideMode() {
+		return configuration.overrideMode;
+	}
+
+	public int getOverrideTime() {
+		return configuration.overrideTime;
+	}
+
+    public DailySchedules getZoneSchedule(String zoneType, String zoneId) {
+        try {
+            return apiClient.getZoneSchedule(zoneType, zoneId);
+        } catch (TimeoutException e) {
+            updateAccountStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
+                    "Timeout on executing request");
+            return null;
+        }
+    }
+
     public void setTcsMode(String tcsId, String mode) {
         tryToCall(() -> apiClient.setTcsMode(tcsId, mode));
+    }
+
+    public void setTemporarySetPoint(String zoneId, double doubleValue, LocalDateTime endPoint) {
+        tryToCall(() -> apiClient.setHeatingZoneOverride(zoneId, doubleValue, endPoint));
     }
 
     public void setPermanentSetPoint(String zoneId, double doubleValue) {
